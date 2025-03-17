@@ -7,7 +7,7 @@ import {
   FileText,
   Home,
   Menu,
-  User,
+  LogIn,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -67,15 +67,25 @@ const Layout = () => {
           </nav>
 
           <div className="flex items-center">
-            <Button variant="outline" size="icon" className="rounded-full mr-2">
-              <User className="h-4 w-4" />
-              <span className="sr-only">User</span>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              asChild
+            >
+              <Link to="/login">
+                <LogIn className="h-4 w-4" />
+                <span>Login</span>
+              </Link>
             </Button>
 
             {/* Mobile navigation */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="md:hidden ml-2"
+                >
                   <Menu className="h-4 w-4" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -96,6 +106,13 @@ const Layout = () => {
                       {item.label}
                     </Link>
                   ))}
+                  <Link
+                    to="/login"
+                    className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary mt-4"
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Link>
                 </nav>
               </SheetContent>
             </Sheet>
