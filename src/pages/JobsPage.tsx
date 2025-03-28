@@ -423,11 +423,7 @@ const JobsPage: React.FC = () => {
 
         <div className="flex flex-wrap gap-1 mb-2">
           {job.skills.map((skill, index) => (
-            <Badge
-              key={index}
-              variant="secondary"
-              className="border-slate-200 bg-slate-50 hover:bg-slate-100"
-            >
+            <Badge key={index} variant="secondary">
               {skill}
             </Badge>
           ))}

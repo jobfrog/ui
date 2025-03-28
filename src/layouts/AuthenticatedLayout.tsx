@@ -354,7 +354,7 @@ const AuthenticatedLayout = () => {
                       )}
                     </div>
                     <span className="hidden sm:inline-block max-w-[140px] truncate text-sm">
-                      {user?.name || user?.email}
+                      {user?.name || user?.nickname || user?.email}
                     </span>
                     <ChevronDown size={14} className="text-muted-foreground" />
                   </Button>
@@ -370,18 +370,11 @@ const AuthenticatedLayout = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/u/example" className="cursor-pointer">
+                    <Link
+                      to={`/u/${user?.nickname}`}
+                      className="cursor-pointer"
+                    >
                       Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/resume" className="cursor-pointer">
-                      My Resume
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/applications" className="cursor-pointer">
-                      My Applications
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

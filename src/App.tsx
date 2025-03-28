@@ -7,17 +7,23 @@ import AuthenticatedLayout from "./layouts/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import SettingsPage from "./pages/SettingsPage";
 
-// Lazy load all page components
+// Lazy load grouped components for better code splitting
+// Dashboard
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const JobsPage = lazy(() => import("./pages/JobsPage"));
-const CertificationPage = lazy(() => import("./pages/CertificationsPage"));
+
+// Career features (jobs, certifications)
+const UserRoutes = lazy(() => import("./routes/UserRoutes"));
+
+// User Profile
 const UserProfile = lazy(() => import("./pages/UserProfile"));
+
+// Organization profile (public view)
 const OrgProfilePage = lazy(() => import("./pages/org/OrgProfilePage"));
-const OrgDashboardPage = lazy(() => import("./pages/org/DashboardPage"));
-const CandidatesPage = lazy(() => import("./pages/org/CandidatesPage"));
-const TeamMembersPage = lazy(() => import("./pages/org/TeamMembersPage"));
-const JobPostingsPage = lazy(() => import("./pages/org/JobPostingsPage"));
+
+// Organization management features (grouped)
+const OrgRoutes = lazy(() => import("./routes/OrgRoutes"));
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-full items-center justify-center">
@@ -129,62 +135,29 @@ function App() {
           >
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
+            <Route path="/settings" element={<SettingsPage />} />
+
+            {/* Career routes - lazy loaded as a group */}
             <Route
-              path="/jobs"
+              path="/*"
               element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <JobsPage />
+                  <UserRoutes />
                 </Suspense>
               }
             />
 
+            {/* Organization routes - lazy loaded as a group */}
             <Route
-              path="/certifications"
+              path="/orgs/:orgSlug/*"
               element={
                 <Suspense fallback={<LoadingFallback />}>
-                  <CertificationPage />
+                  <OrgRoutes />
                 </Suspense>
               }
             />
 
-            {/* Organization routes grouped together */}
-            <Route path="/orgs/:orgSlug">
-              <Route
-                path="dashboard"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <OrgDashboardPage />
-                  </Suspense>
-                }
-              />
-
-              <Route
-                path="candidates"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <CandidatesPage />
-                  </Suspense>
-                }
-              />
-
-              <Route
-                path="team"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <TeamMembersPage />
-                  </Suspense>
-                }
-              />
-
-              <Route
-                path="jobs"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <JobPostingsPage />
-                  </Suspense>
-                }
-              />
-            </Route>
+            {/* Add more authenticated routes here */}
           </Route>
 
           {/* 404: Not Found */}
