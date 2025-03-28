@@ -9,12 +9,6 @@ import "./index.css";
 const domain = import.meta.env.VITE_AUTH0_DOMAIN || "";
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID || "";
 
-// Log environment variables loading (will be removed in production)
-console.log("Auth0 Environment Variables:", {
-  domainLoaded: !!domain,
-  clientIdLoaded: !!clientId,
-});
-
 if (!domain || !clientId) {
   console.error("Auth0 configuration is missing. Please check your .env file.");
 }

@@ -4,14 +4,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 
 const UnauthenticatedLayout = () => {
-  const { loginWithRedirect, isAuthenticated, user } = useAuth0();
-
-  // Debug Auth0 in UnauthenticatedLayout
-  console.log("UnauthenticatedLayout Auth0:", { isAuthenticated, user });
+  const { loginWithRedirect } = useAuth0();
 
   // Auth0 redirect functions
   const handleSignIn = () => {
-    console.log("Sign In button clicked");
     loginWithRedirect({
       appState: { returnTo: "/dashboard" },
       authorizationParams: {
@@ -22,7 +18,6 @@ const UnauthenticatedLayout = () => {
   };
 
   const handleSignUp = () => {
-    console.log("Sign Up button clicked");
     loginWithRedirect({
       appState: { returnTo: "/dashboard" },
       authorizationParams: {

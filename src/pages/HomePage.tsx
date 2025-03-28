@@ -1,11 +1,30 @@
-// src/pages/HomePage.tsx
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 
 const HomePage = () => {
-  const { loginWithRedirect, isAuthenticated } = useAuth0();
+  const { loginWithRedirect } = useAuth0();
 
-  console.log("HomePage Auth0 Status:", { isAuthenticated });
+  // Auth0 redirect functions
+  const handleSignIn = () => {
+    loginWithRedirect({
+      appState: { returnTo: "/dashboard" },
+      authorizationParams: {
+        redirect_uri:
+          import.meta.env.VITE_AUTH0_REDIRECT_URI || window.location.origin,
+      },
+    });
+  };
+
+  const handleSignUp = () => {
+    loginWithRedirect({
+      appState: { returnTo: "/dashboard" },
+      authorizationParams: {
+        redirect_uri:
+          import.meta.env.VITE_AUTH0_REDIRECT_URI || window.location.origin,
+        screen_hint: "signup",
+      },
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-16 flex flex-col items-center">
@@ -16,22 +35,14 @@ const HomePage = () => {
           jobfrog is a technical recruiting platform that helps match talented
           developers with companies that value their skills and potential.
         </p>
-        <Button
-          size="lg"
-          onClick={() => {
-            console.log("Get Started button clicked");
-            loginWithRedirect({
-              appState: { returnTo: "/dashboard" },
-              authorizationParams: {
-                redirect_uri:
-                  import.meta.env.VITE_AUTH0_REDIRECT_URI ||
-                  window.location.origin,
-              },
-            });
-          }}
-        >
-          Get Started
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button size="lg" onClick={handleSignUp}>
+            Sign up for free
+          </Button>
+          <Button size="lg" variant="outline" onClick={handleSignIn}>
+            Sign in
+          </Button>
+        </div>
       </section>
 
       {/* Features section */}
@@ -74,16 +85,7 @@ const HomePage = () => {
           Whether you're looking for your next role or building your team,
           jobfrog is here to help you make the leap.
         </p>
-        <Button
-          onClick={() => {
-            console.log("Sign Up Now button clicked");
-            loginWithRedirect({
-              appState: { returnTo: "/dashboard" },
-            });
-          }}
-        >
-          Sign Up Now
-        </Button>
+        <Button onClick={handleSignUp}>Sign up now</Button>
       </section>
     </div>
   );

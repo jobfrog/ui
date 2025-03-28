@@ -5,6 +5,8 @@ import { Suspense, lazy, useEffect } from "react";
 import UnauthenticatedLayout from "./layouts/UnauthenticatedLayout";
 import AuthenticatedLayout from "./layouts/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 // Lazy load authenticated pages for code splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -24,7 +26,6 @@ function App() {
     if (error) {
       console.error("Auth0 Error:", error);
     }
-    console.log("Auth0 Status:", { isLoading, isAuthenticated });
   }, [isLoading, isAuthenticated, error]);
 
   // Show loading state while Auth0 initializes
@@ -35,13 +36,38 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Unauthenticated routes */}
+        {/* Root path - conditionally render based on auth state */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <AuthenticatedLayout />
+            ) : (
+              <UnauthenticatedLayout />
+            )
+          }
+        >
+          <Route
+            index
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  <Dashboard />
+                </Suspense>
+              ) : (
+                <HomePage />
+              )
+            }
+          />
+        </Route>
+
+        {/* Public routes that always use UnauthenticatedLayout */}
         <Route element={<UnauthenticatedLayout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           {/* Add more public routes here */}
         </Route>
 
-        {/* Authenticated routes */}
+        {/* Authenticated routes that require login */}
         <Route
           element={
             isAuthenticated ? (
@@ -51,19 +77,15 @@ function App() {
             )
           }
         >
-          <Route
-            path="/dashboard"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Dashboard />
-              </Suspense>
-            }
-          />
+          {/* Dashboard path redirects to home when authenticated since they're the same */}
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+
+          {/* Other authenticated routes */}
           {/* Add more authenticated routes here */}
         </Route>
 
-        {/* Catch-all route redirects to homepage */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Custom 404 Not Found page */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
