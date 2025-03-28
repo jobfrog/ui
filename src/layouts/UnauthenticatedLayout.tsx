@@ -2,6 +2,7 @@
 import { Outlet } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const UnauthenticatedLayout = () => {
   const { loginWithRedirect } = useAuth0();
@@ -43,6 +44,7 @@ const UnauthenticatedLayout = () => {
             <Button variant="default" onClick={handleSignUp}>
               Sign up
             </Button>
+            <ModeToggle />
           </div>
         </div>
       </header>

@@ -21,7 +21,6 @@ import {
   Users,
   Settings,
   Search,
-  Bell,
   Building,
   Lightbulb,
   Award,
@@ -35,6 +34,7 @@ import {
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { LucideIcon } from "lucide-react";
+import { ModeToggle } from "@/components/mode-toggle";
 
 // Define interface for navigation items
 interface NavItem {
@@ -280,44 +280,7 @@ const AuthenticatedLayout = () => {
             </div>
 
             <div className="ml-4 flex items-center gap-2">
-              {/* Notifications button */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground relative"
-                  >
-                    <Bell size={18} />
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-                      5
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <div className="max-h-80 overflow-y-auto">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <DropdownMenuItem key={i} className="cursor-pointer py-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium">New job match</span>
-                          <span className="text-xs text-muted-foreground">
-                            Your profile matches a new Senior Developer position
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {i} hour{i !== 1 ? "s" : ""} ago
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer justify-center font-medium">
-                    View all notifications
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ModeToggle />
 
               {/* User dropdown menu */}
               <DropdownMenu>

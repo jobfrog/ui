@@ -2,6 +2,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 import UnauthenticatedLayout from "./layouts/UnauthenticatedLayout";
 import AuthenticatedLayout from "./layouts/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
@@ -34,60 +35,62 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Root path - conditionally render based on auth state */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <AuthenticatedLayout />
-            ) : (
-              <UnauthenticatedLayout />
-            )
-          }
-        >
+    <ThemeProvider storageKey="vite-ui-theme">
+      <BrowserRouter>
+        <Routes>
+          {/* Root path - conditionally render based on auth state */}
           <Route
-            index
+            path="/"
             element={
               isAuthenticated ? (
-                <Suspense fallback={<LoadingFallback />}>
-                  <Dashboard />
-                </Suspense>
+                <AuthenticatedLayout />
               ) : (
-                <HomePage />
+                <UnauthenticatedLayout />
               )
             }
-          />
-        </Route>
+          >
+            <Route
+              index
+              element={
+                isAuthenticated ? (
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Dashboard />
+                  </Suspense>
+                ) : (
+                  <HomePage />
+                )
+              }
+            />
+          </Route>
 
-        {/* Public routes that always use UnauthenticatedLayout */}
-        <Route element={<UnauthenticatedLayout />}>
-          <Route path="/login" element={<LoginPage />} />
-          {/* Add more public routes here */}
-        </Route>
+          {/* Public routes that always use UnauthenticatedLayout */}
+          <Route element={<UnauthenticatedLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            {/* Add more public routes here */}
+          </Route>
 
-        {/* Authenticated routes that require login */}
-        <Route
-          element={
-            isAuthenticated ? (
-              <AuthenticatedLayout />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        >
-          {/* Dashboard path redirects to home when authenticated since they're the same */}
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          {/* Authenticated routes that require login */}
+          <Route
+            element={
+              isAuthenticated ? (
+                <AuthenticatedLayout />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          >
+            {/* Dashboard path redirects to home when authenticated since they're the same */}
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
-          {/* Other authenticated routes */}
-          {/* Add more authenticated routes here */}
-        </Route>
+            {/* Other authenticated routes */}
+            {/* Add more authenticated routes here */}
+          </Route>
 
-        {/* Custom 404 Not Found page */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Custom 404 Not Found page */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
