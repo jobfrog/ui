@@ -1,6 +1,12 @@
 // src/layouts/AuthenticatedLayout.tsx
 
-import { Outlet, Link, useLocation } from "react-router-dom";
+import {
+  Outlet,
+  Link,
+  useLocation,
+  useParams,
+  useNavigate,
+} from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   DropdownMenu,
@@ -23,13 +29,12 @@ import {
   Settings,
   Search,
   Building,
-  Lightbulb,
   Award,
   Menu,
   PlusCircle,
-  Building2,
+  Grid2X2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { LucideIcon } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -42,18 +47,61 @@ interface NavItem {
   badge?: string;
 }
 
+// Define Organization interface
+interface Organization {
+  id: string;
+  slug: string;
+  name: string;
+  role: string;
+}
+
 // Mock organizations for the demo
-const organizations = [
-  { id: "personal", name: "Personal Account", role: "Member" },
-  { id: "acme", name: "Acme Inc", role: "Admin" },
-  { id: "globex", name: "Globex Corporation", role: "Member" },
+const organizations: Organization[] = [
+  {
+    id: "personal",
+    slug: "personal",
+    name: "Personal Account",
+    role: "Member",
+  },
+  { id: "acme", slug: "acme-inc", name: "Acme Inc", role: "Admin" },
+  {
+    id: "globex",
+    slug: "globex-corp",
+    name: "Globex Corporation",
+    role: "Member",
+  },
 ];
 
 const AuthenticatedLayout = () => {
   const { logout, user } = useAuth0();
   const location = useLocation();
-  const [activeOrg, setActiveOrg] = useState(organizations[0]);
+  const params = useParams();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Get the orgSlug from URL params
+  const { orgSlug } = params;
+
+  // Find the active organization based on URL
+  const [activeOrg, setActiveOrg] = useState(() => {
+    // If URL has an org slug, find that org
+    if (orgSlug) {
+      const foundOrg = organizations.find((org) => org.slug === orgSlug);
+      return foundOrg || organizations[0];
+    }
+    // Default to personal
+    return organizations[0];
+  });
+
+  // Update active org when URL changes
+  useEffect(() => {
+    if (orgSlug) {
+      const foundOrg = organizations.find((org) => org.slug === orgSlug);
+      if (foundOrg) {
+        setActiveOrg(foundOrg);
+      }
+    }
+  }, [orgSlug]);
 
   const navigation: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -61,17 +109,34 @@ const AuthenticatedLayout = () => {
     { name: "Certifications", href: "/certifications", icon: Award },
   ];
 
-  const organizationNav: NavItem[] = [
-    { name: "Organization Profile", href: "/org/profile", icon: Building2 },
-    { name: "Team Members", href: "/org/team", icon: Users },
-    { name: "Job Postings", href: "/org/jobs", icon: Briefcase },
-    { name: "Candidates", href: "/org/candidates", icon: Users },
-    { name: "Analytics", href: "/org/analytics", icon: Lightbulb },
+  // Generate dynamic links based on active organization
+  const getOrgNavigation = (org: Organization): NavItem[] => [
+    { name: "Dashboard", href: `/orgs/${org.slug}/dashboard`, icon: Grid2X2 },
+    { name: "Profile", href: `/orgs/${org.slug}`, icon: Building },
+    { name: "Candidates", href: `/orgs/${org.slug}/candidates`, icon: Users },
+    { name: "Team Members", href: `/orgs/${org.slug}/team`, icon: Users },
+    { name: "Job Postings", href: `/orgs/${org.slug}/jobs`, icon: Briefcase },
   ];
 
   // Determine which navigation to show based on active organization
   const showOrgNav = activeOrg.id !== "personal";
-  const currentNav = showOrgNav ? organizationNav : navigation;
+  const currentNav = showOrgNav ? getOrgNavigation(activeOrg) : navigation;
+
+  // Handle organization switching
+  const handleOrgChange = (orgId: string) => {
+    const org = organizations.find((o) => o.id === orgId);
+    if (org) {
+      setActiveOrg(org);
+
+      // Navigate to the corresponding org route if switching to an org
+      if (org.id !== "personal") {
+        navigate(`/orgs/${org.slug}/dashboard`);
+      } else {
+        // Navigate to personal dashboard if switching to personal
+        navigate("/");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -120,10 +185,7 @@ const AuthenticatedLayout = () => {
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup
                 value={activeOrg.id}
-                onValueChange={(value) => {
-                  const org = organizations.find((o) => o.id === value);
-                  if (org) setActiveOrg(org);
-                }}
+                onValueChange={handleOrgChange}
               >
                 {organizations.map((org) => (
                   <DropdownMenuRadioItem
@@ -205,12 +267,7 @@ const AuthenticatedLayout = () => {
           {activeOrg.id === "personal" ? (
             showOrgNav ? null : (
               <button
-                onClick={() =>
-                  setActiveOrg(
-                    organizations.find((o) => o.id === "acme") ||
-                      organizations[0]
-                  )
-                }
+                onClick={() => handleOrgChange("acme")}
                 className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-md transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
               >
                 <Building size={18} />
@@ -219,12 +276,7 @@ const AuthenticatedLayout = () => {
             )
           ) : (
             <button
-              onClick={() =>
-                setActiveOrg(
-                  organizations.find((o) => o.id === "personal") ||
-                    organizations[0]
-                )
-              }
+              onClick={() => handleOrgChange("personal")}
               className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-md transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
             >
               <User size={18} />
@@ -318,7 +370,7 @@ const AuthenticatedLayout = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
+                    <Link to="/u/example" className="cursor-pointer">
                       Profile
                     </Link>
                   </DropdownMenuItem>
@@ -421,10 +473,7 @@ const AuthenticatedLayout = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                       value={activeOrg.id}
-                      onValueChange={(value) => {
-                        const org = organizations.find((o) => o.id === value);
-                        if (org) setActiveOrg(org);
-                      }}
+                      onValueChange={handleOrgChange}
                     >
                       {organizations.map((org) => (
                         <DropdownMenuRadioItem
@@ -506,10 +555,7 @@ const AuthenticatedLayout = () => {
                   showOrgNav ? null : (
                     <button
                       onClick={() => {
-                        setActiveOrg(
-                          organizations.find((o) => o.id === "acme") ||
-                            organizations[0]
-                        );
+                        handleOrgChange("acme");
                         setMobileMenuOpen(false);
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-md transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -521,10 +567,7 @@ const AuthenticatedLayout = () => {
                 ) : (
                   <button
                     onClick={() => {
-                      setActiveOrg(
-                        organizations.find((o) => o.id === "personal") ||
-                          organizations[0]
-                      );
+                      handleOrgChange("personal");
                       setMobileMenuOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-md transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"

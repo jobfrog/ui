@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useAuth0 } from "@auth0/auth0-react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
@@ -8,13 +7,18 @@ import AuthenticatedLayout from "./layouts/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import JobsPage from "./pages/JobsPage";
-import CertificationPage from "./pages/CertificationsPage";
 
-// Lazy load authenticated pages for code splitting
+// Lazy load all page components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const JobsPage = lazy(() => import("./pages/JobsPage"));
+const CertificationPage = lazy(() => import("./pages/CertificationsPage"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const OrgProfilePage = lazy(() => import("./pages/org/OrgProfilePage"));
+const OrgDashboardPage = lazy(() => import("./pages/org/DashboardPage"));
+const CandidatesPage = lazy(() => import("./pages/org/CandidatesPage"));
+const TeamMembersPage = lazy(() => import("./pages/org/TeamMembersPage"));
+const JobPostingsPage = lazy(() => import("./pages/org/JobPostingsPage"));
 
-// Loading state component
 const LoadingFallback = () => (
   <div className="flex h-screen w-full items-center justify-center">
     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
@@ -24,14 +28,12 @@ const LoadingFallback = () => (
 function App() {
   const { isAuthenticated, isLoading, error } = useAuth0();
 
-  // Debug Auth0 connection
   useEffect(() => {
     if (error) {
       console.error("Auth0 Error:", error);
     }
   }, [isLoading, isAuthenticated, error]);
 
-  // Show loading state while Auth0 initializes
   if (isLoading) {
     return <LoadingFallback />;
   }
@@ -65,13 +67,57 @@ function App() {
             />
           </Route>
 
-          {/* Public routes that always use UnauthenticatedLayout */}
+          {/* Public routes (still always unauthenticated layout) */}
           <Route element={<UnauthenticatedLayout />}>
             <Route path="/login" element={<LoginPage />} />
-            {/* Add more public routes here */}
+            {/* ...any other truly public routes here... */}
           </Route>
 
-          {/* Authenticated routes that require login */}
+          {/* Routes that adapt layout based on authentication status */}
+
+          {/* User profiles */}
+          <Route
+            path="/u/:username"
+            element={
+              isAuthenticated ? (
+                <AuthenticatedLayout />
+              ) : (
+                <UnauthenticatedLayout />
+              )
+            }
+          >
+            <Route
+              index
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <UserProfile />
+                </Suspense>
+              }
+            />
+          </Route>
+
+          {/* Organization profiles - use auth layout if logged in, unauth if not */}
+          <Route
+            path="/orgs/:orgSlug"
+            element={
+              isAuthenticated ? (
+                <AuthenticatedLayout />
+              ) : (
+                <UnauthenticatedLayout />
+              )
+            }
+          >
+            <Route
+              index
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <OrgProfilePage />
+                </Suspense>
+              }
+            />
+          </Route>
+
+          {/* Authenticated-only routes */}
           <Route
             element={
               isAuthenticated ? (
@@ -81,16 +127,67 @@ function App() {
               )
             }
           >
-            {/* Dashboard path redirects to home when authenticated since they're the same */}
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
-            {/* Other authenticated routes */}
-            <Route path="/jobs" element={<JobsPage />} />
-            <Route path="/certifications" element={<CertificationPage />} />
-            {/* Add more authenticated routes here */}
+            <Route
+              path="/jobs"
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <JobsPage />
+                </Suspense>
+              }
+            />
+
+            <Route
+              path="/certifications"
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <CertificationPage />
+                </Suspense>
+              }
+            />
+
+            {/* Organization routes grouped together */}
+            <Route path="/orgs/:orgSlug">
+              <Route
+                path="dashboard"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <OrgDashboardPage />
+                  </Suspense>
+                }
+              />
+
+              <Route
+                path="candidates"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <CandidatesPage />
+                  </Suspense>
+                }
+              />
+
+              <Route
+                path="team"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <TeamMembersPage />
+                  </Suspense>
+                }
+              />
+
+              <Route
+                path="jobs"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <JobPostingsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
           </Route>
 
-          {/* Custom 404 Not Found page */}
+          {/* 404: Not Found */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
