@@ -8,6 +8,8 @@ import AuthenticatedLayout from "./layouts/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import JobsPage from "./pages/JobsPage";
+import CertificationPage from "./pages/CertificationsPage";
 
 // Lazy load authenticated pages for code splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -83,6 +85,8 @@ function App() {
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
             {/* Other authenticated routes */}
+            <Route path="/jobs" element={<JobsPage />} />
+            <Route path="/certifications" element={<CertificationPage />} />
             {/* Add more authenticated routes here */}
           </Route>
 
